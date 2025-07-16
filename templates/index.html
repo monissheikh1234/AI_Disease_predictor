@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Health Care Center</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #e6f7fb;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+
+    .navbar {
+      background-color: #32aecd !important;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .navbar-brand,
+    .nav-link,
+    .btn-outline-success {
+      color: white !important;
+      font-weight: 500;
+    }
+
+    .btn-outline-success {
+      border-color: white;
+    }
+
+    .btn-outline-success:hover {
+      background-color: white;
+      color: #32aecd !important;
+    }
+
+    .logo .myimg {
+      width: 50px;
+      height: 50px;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+
+    h1 {
+      color: #32aecd;
+      font-weight: 700;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .container {
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .form-container {
+      background: #ffffff;
+      color: #333;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary,
+    .btn-danger,
+    .toggle-button {
+      border: none;
+      border-radius: 25px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-primary:hover,
+    .btn-danger:hover,
+    .toggle-button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    .toggle-button {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 6px;
+      padding: 8px 16px;
+    }
+
+    #diseaseModal .modal-content,
+    #descriptionModal .modal-content,
+    #precautionModal .modal-content,
+    #medicationsModal .modal-content,
+    #workoutsModal .modal-content,
+    #dietsModal .modal-content {
+      background-color: #f5fdff;
+    }
+
+    .modal-header {
+      background-color: #32aecd;
+      color: white;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .text-green {
+      color: #32aecd;
+    }
+
+     .predict-btn {
+        background-color: #5e70a1;
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .predict-btn:hover {
+        background-color: #46567f;
+        color: #eeeeee;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <div class="logo">
+        <img class="myimg" src="{{ url_for('static', filename='img.png') }}" alt="Logo">
+      </div>
+      <a class="navbar-brand ms-2" href="#">Health Center</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+    </div>
+  </nav>
+
+  <!-- Main Heading -->
+  <h1 class="mt-4 text-center text-green">Health Care Center</h1>
+
+  <!-- Form Container -->
+  <div class="container my-4">
+    <div class="form-container">
+      <form action="/predict" method="post">
+        <div class="form-group">
+          <label for="symptoms">Select Symptoms:</label>
+          <input type="text" class="form-control" id="symptoms" name="symptoms" placeholder="e.g., itching, sleeping, aching">
+        </div>
+        <br>
+        <button type="button" id="startSpeechRecognition" class="btn btn-primary">Start Speech Recognition</button>
+        <br><br>
+        <div id="transcription" class="mb-3 text-muted"></div>
+
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+
+       <button type="submit" class="btn btn-lg w-100 predict-btn">
+    Predict
+</button>
+
+
+      </form>
+    </div>
+  </div>
+
+  {% if predicted_disease %}
+  <h1 class="text-center mt-5 text-green">Our AI System Results</h1>
+  <div class="container text-center">
+    <button class="toggle-button btn btn-warning" data-bs-toggle="modal" data-bs-target="#diseaseModal">Disease</button>
+    <button class="toggle-button btn btn-info" data-bs-toggle="modal" data-bs-target="#descriptionModal">Description</button>
+    <button class="toggle-button btn btn-success" data-bs-toggle="modal" data-bs-target="#precautionModal">Precaution</button>
+    <button class="toggle-button btn btn-danger" data-bs-toggle="modal" data-bs-target="#medicationsModal">Medications</button>
+    <button class="toggle-button btn btn-secondary" data-bs-toggle="modal" data-bs-target="#workoutsModal">Workouts</button>
+    <button class="toggle-button btn btn-warning" data-bs-toggle="modal" data-bs-target="#dietsModal">Diets</button>
+  </div>
+  {% endif %}
+
+  <!-- Modals -->
+  {% for modal_id, modal_title, modal_data in [
+      ('diseaseModal', 'Predicted Disease', predicted_disease),
+      ('descriptionModal', 'Description', dis_des),
+      ('precautionModal', 'Precaution', my_precautions),
+      ('medicationsModal', 'Medications', medications),
+      ('workoutsModal', 'Workouts', workout),
+      ('dietsModal', 'Diets', my_diet)
+  ] %}
+  <div class="modal fade" id="{{ modal_id }}" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ modal_title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% if modal_data is string %}
+            <p>{{ modal_data }}</p>
+          {% else %}
+            <ul>
+              {% for item in modal_data %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Scripts -->
+  <script>
+    const startSpeechRecognitionButton = document.getElementById('startSpeechRecognition');
+    const transcriptionDiv = document.getElementById('transcription');
+
+    function startSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Speech recognition not supported in this browser.');
+        return;
+      }
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('symptoms').value = transcript;
+        transcriptionDiv.innerText = transcript;
+      };
+
+      recognition.onerror = function (event) {
+        alert('Speech recognition error: ' + event.error);
+      };
+
+      recognition.start();
+    }
+
+    startSpeechRecognitionButton.onclick = startSpeechRecognition;
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
