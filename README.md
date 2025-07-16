@@ -12,6 +12,12 @@ Welcome to the **AI Disease Predictor**, a powerful web-based application that l
 - 🗣️ **Speech-to-Text Symptom Input**  
 - 📱 **Responsive UI** with clean modals for details  
 
+## Sanpshot
+
+https://github.com/user-attachments/assets/49a81276-dd7b-4f62-a19f-332f90677a23
+
+
+
 ## 🚀 Tech Stack
 
 | Technology   | Description                    |
